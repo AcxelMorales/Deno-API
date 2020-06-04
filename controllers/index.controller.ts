@@ -70,7 +70,6 @@ export const createUser = async ({ request, response }: { request: Request, resp
 
 export const updateUser = async ({ request, response, params }: { request: Request, response: Response, params: Params }) => {
   const userFound = usersDB.find(userDB => userDB.id === params.id);
-  const body = await request.body();
 
   if (!request.hasBody) {
     response.status = 404;
@@ -84,13 +83,16 @@ export const updateUser = async ({ request, response, params }: { request: Reque
     response.status = 404;
     response.body = response404;
   } else {
-    userFound.name = body.value.name;
+    const body = await request.body();
+    const updateUserDB = body.value;
+
+    usersDB = usersDB.map(user => user.id === params.id ? { ...user, ...updateUserDB } : user);
 
     response.status = 200;
     response.body = {
       ok: true,
       message: "User updated",
-      user: userFound
+      users: usersDB
     };
   }
 }
